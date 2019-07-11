@@ -27,8 +27,9 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--name", "workstation"]
     end
     workstation.vm.provision "ansible_local" do |ansible|
-      compatibility_mode = "2.0"
-      ansible.playbook = "workstation.yml"
+      ansible.compatibility_mode  = "2.0"
+      ansible.playbook            = "workstation.yml"
+      ansible.verbose             = false
     end
   end
 end
