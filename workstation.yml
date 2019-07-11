@@ -1,0 +1,232 @@
+---
+- name: Ansible Controller Tasks
+  hosts: workstation
+  become: true # Default become_user is root
+  vars:
+    localadmin: vagrant
+  tasks:
+
+  - name: Existing Packages on Latest Version
+    apt:
+      update_cache: yes
+      upgrade: dist
+
+  - name: Software Packages
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - ansible
+      - bash-completion
+      - gcc
+      - ipcalc
+      - jq
+      - libkrb5-dev
+      - libssl-dev
+      - python-apt
+      - python-dev
+      - python-pip
+      - renameutils
+      - vim-nox
+
+  - name: Python Packages (PIP)
+    pip:
+      name:
+      - pywinrm>=0.3.0
+      - pywinrm[kerberos]
+      - pywinrm[credssp]
+      - requests-kerberos
+      - requests-credssp
+      - ansible[azure]
+      - yq
+
+  - name: Private SSH Key Exists
+    stat:
+      path: "/home/{{ localadmin }}/.ssh/id_rsa"
+    register: ssh_key
+
+  - name: Generate SSH Keys if Non-Existent
+    shell: |
+      ssh-keygen -b 2048 -t rsa -f "/home/{{ localadmin }}/.ssh/id_rsa" -q -N "" -C ""
+    when: ssh_key.stat.exists == False
+    # become_user: "{{ localadmin }}"
+    # become: true
+
+  - name: SSH Key Permissions
+    file:
+      path: "/home/{{ localadmin }}/.ssh/id_rsa"
+      owner: "{{ localadmin }}"
+      group: "{{ localadmin }}"
+      mode: 0600
+
+  - name: Ansible Vault Password File Ownership and Permissions
+    file:
+      path: "/home/{{ localadmin }}/.ansible/.vault_password"
+      owner: "{{ localadmin }}"
+      group: "{{ localadmin }}"
+      mode: 0600
+
+  - name: Ansible Vault Password Variable Export
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: "^export.ANSIBLE_VAULT_PASSWORD_FILE=.*.ansible/.vault_password"
+      line: "export ANSIBLE_VAULT_PASSWORD_FILE=~/.ansible/.vault_password"
+      state: present
+
+  - name: Ansible Host Key Checking Variable Export
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: "^export.ANSIBLE_HOST_KEY_CHECKING.*"
+      line: "export ANSIBLE_HOST_KEY_CHECKING=False"
+      state: present
+
+  - name: Azure Profile Credentials Variable Export
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: "^export.AZURE_PROFILE=.*.azure/.credentials"
+      line: "export AZURE_PROFILE=~/.azure/.credentials"
+      state: present
+
+  - name: Azure Profile Credentials Variable Export
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: "^export.AZURE_DEVOPS_EXT_PAT=.*"
+      line: "export AZURE_DEVOPS_EXT_PAT=$(source ~/.azure/.azure_devops_token)"
+      state: present
+
+  - name: Verify kubeadm Completion in .bashrc
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: ".*source.*kubeadm.completion.bash."
+      line: "source <(kubeadm completion bash)"
+      state: present
+
+  - name: Verify kubectl Completion in .bashrc
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: ".*source.*kubectl.completion.bash."
+      line: "source <(kubectl completion bash)"
+      state: present
+
+  # Non-Essential - For convenience when working in an interactive Bash session
+  - name: Color Prompt in .bashrc
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: ".*force_color_prompt=.*"
+      line: "force_color_prompt=yes"
+      state: present
+
+  # Non-Essential - For convenience when working in an interactive Bash session
+  - name: Working Directory in .bashrc
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: "^pushd.*code.*Set.current.working.directory"
+      line: "pushd ~/code/ # Set current working directory"
+      state: present
+
+  - name: Default Editor
+    alternatives:
+      name: editor
+      path: /usr/bin/vim.nox
+      priority: 80
+
+  - name: Azure CLI Prerequisite Software
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - apt-transport-https
+      - lsb-release
+      - gnupg
+
+  - name: Microsoft Apt Signing Key
+    apt_key:
+      url: https://packages.microsoft.com/keys/microsoft.asc
+      state: present
+
+  - name: Microsoft Azure CLI Apt Repository
+    apt_repository:
+      # repo: deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_local['ansible_lsb']['codename'] }} main
+      repo: deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ bionic main
+      state: present
+
+  - name: Azure CLI 
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - azure-cli
+
+  - stat:
+      path: /usr/bin/az
+    register: azure_cli
+
+  # Azure DevOps Extension for Azure CLI
+  # https://github.com/Azure/azure-devops-cli-extension
+  - name: Azure DevOps CLI
+    shell: 'az extension add --name azure-devops'
+    when: azure_cli is defined and azure_cli.stat.executable
+ 
+  - name: Microsoft Repository GPG keys
+    apt:
+      deb: https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
+
+  - name: PowerShell Core
+    apt:
+      name: powershell
+      state: present
+      update_cache: yes
+
+  - name: PowerShell Trusted Repository - PSGallery
+    shell: 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
+    args:
+      executable: /usr/bin/pwsh
+
+  - name: PowerShell Module - PowerShellGet
+    shell: 'Install-Module -Name PowerShellGet -Force'
+    args:
+      executable: /usr/bin/pwsh
+
+  - name: Azure PowerShell Modules Path
+    stat:
+      path: "/home/{{ localadmin }}/.local/share/powershell/Modules/Az"
+    register: azure_powershell
+    when: azure_powershell.stat.isdir is not defined
+
+# - debug:
+#     var: azure_powershell
+
+  - name: Azure PowerShell Modules
+    shell: 'Install-Module -Name Az -AllowClobber -Force'
+    args:
+      executable: /usr/bin/pwsh
+    when: azure_powershell.stat.isdir is defined and azure_powershell.stat.isdir
+
+  - name: Apt Signing Key for Kubernetes
+    apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      state: present
+
+  - name: Apt Repository for Kubernetes
+    apt_repository:
+      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+      filename: kubernetes.list
+
+  - name: Kubernetes Binaries
+    apt: 
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+        - kubeadm 
+        - kubectl
+
+...
