@@ -40,6 +40,7 @@
       - requests-kerberos
       - requests-credssp
       - ansible[azure]
+      - awscli
       - yq
 
   - name: Private SSH Key Exists
@@ -93,7 +94,7 @@
     lineinfile:
       path: "/home/{{ localadmin }}/.bashrc"
       regexp: "^export.AZURE_DEVOPS_EXT_PAT=.*"
-      line: "export AZURE_DEVOPS_EXT_PAT=$(source ~/.azure/.azure_devops_token)"
+      line: "export AZURE_DEVOPS_EXT_PAT=$(echo ~/.azure/azure_devops_token)"
       state: present
 
   - name: Verify kubeadm Completion in .bashrc
@@ -111,7 +112,15 @@
       state: present
 
   # Non-Essential - For convenience when working in an interactive Bash session
-  - name: Color Prompt in .bashrc
+  - name: Prompt in .bashrc
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: "^PS1=.*"
+      line: "PS1='\\n\\[\\033[36m\\]\\W\\n\\[\\033[0m\\]$ \\[\\033[0m\\]'"
+      state: present
+
+  # Non-Essential - For convenience when working in an interactive Bash session
+  - name: Prompt in .bashrc
     lineinfile:
       path: "/home/{{ localadmin }}/.bashrc"
       regexp: ".*force_color_prompt=.*"
