@@ -9,6 +9,7 @@
 
 # Declare files that will always have LF line endings on checkout.
 *.config        text    eol=lf
+*.conf          text    eol=lf
 *.sh            text    eol=lf
 .bash*          text    eol=lf
 .gitattributes  text    eol=lf
