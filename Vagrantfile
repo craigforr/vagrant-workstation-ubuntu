@@ -13,12 +13,14 @@ Vagrant.configure("2") do |config|
     workstation.vm.box = "ubuntu/bionic64"
     workstation.vm.hostname = 'workstation'
     workstation.vm.network :private_network, ip: "192.168.56.11"
-    workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSATION_ANSIBLE_VAULT_SECRET']}", destination: "/home/vagrant/.ansible/.vault_password"
+    workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_ANSIBLE_VAULT_SECRET']}", destination: "/home/vagrant/.ansible/.vault_password"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AZURE_CREDENTIALS']}", destination: "/home/vagrant/.azure/credentials"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AZURE_DEVOPS_TOKEN']}", destination: "/home/vagrant/.azure/azure_devops_token"
+    workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AWS_CREDENTIALS']}", destination: "/home/vagrant/.aws/credentials"
     workstation.vm.provision "file", source: "files/.bash_aliases", destination: "/home/vagrant/.bash_aliases"
     workstation.vm.provision "file", source: "files/.vimrc", destination: "/home/vagrant/.vimrc"
     workstation.vm.provision "file", source: "files/azure_config.ini", destination: "/home/vagrant/.azure/config"
+    workstation.vm.provision "file", source: "files/.tmux.conf", destination: "/home/vagrant/.tmux.conf"
     workstation.vm.synced_folder "/code", "/home/vagrant/code"
     workstation.vm.provider :virtualbox do |v|
       v.gui = false
