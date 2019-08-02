@@ -1,6 +1,58 @@
 " .vimrc ===============================================================
 filetype plugin indent on
 " Vim ==================================================================
+" Vundle ===============================================================
+" To set up Vundle:
+" git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+filetype off
+" Set the runtimepath to include Vundle and initialize
+" set rtp+=$HOME/vimfiles/bundle/Vundle.vim/
+" Or, for Linux:
+" Vundle : Plugin commands go here, between vundle#begin/end.
+if has('win32')
+    call vundle#begin('$USERPROFILE/vimfiles/bundle/')
+    set rtp+=~/.vim/bundle/Vundle.vim
+else
+    set rtp+=~/.vim/bundle/Vundle.vim/
+    call vundle#rc()
+endif
+" Let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+" ----------------------------------------------- Vundle Managed Plugins
+Plugin 'chriskempson/base16-vim'
+Plugin 'elzr/vim-json'
+Plugin 'flazz/vim-colorschemes'
+Plugin 'itchyny/lightline.vim'
+" -- hashivim --
+Plugin 'hashivim/vim-hashicorp-tools'
+"" " ----
+"" " Plugin 'b4b4r07/vim-hcl'
+Plugin 'PProvost/vim-ps1'
+"" " -- tpope --
+Plugin 'tpope/vim-fugitive'
+" Plugin 'tpope/vim-markdown'
+" Plugin 'tpope/vim-surround'
+" Plugin 'tpope/vim-vinegar'
+" ----
+Plugin 'vimwiki/vimwiki'
+Plugin 'christianrondeau/vim-azure-log-analytics'
+" Plugin 'fatih/vim-go' ", { 'do': ':GoInstallBinaries' }
+" -- unused --
+" Plugin 'Xuyuanp/nerdtree-git-plugin'
+" Plugin 'Yggdroot/indentLine'
+" Plugin 'michaeljsmith/vim-indent-object'
+" Plugin 'nelstrom/vim-markdown-folding'
+" Plugin 'plasticboy/vim-markdown'
+" Plugin 'pseewald/vim-anyfold'
+" Plugin 'scrooloose/nerdtree'
+" Plugin 'Xuyuanp/nerdtree-git-plugin'
+" Plugin 'michaeljsmith/vim-indent-object'
+" Plugin 'vim-scripts/indentpython.vim'
+" Plugin 'nelstrom/vim-markdown-folding'
+" ----------------------------------------------------------------------
+" All Plugins must be added before the following line
+call vundle#end()
+filetype plugin indent on
 set colorcolumn=
 "set nowrap
 " set encoding=utf-8

@@ -8,7 +8,7 @@
 id_rsa*
 
 # Vagrant
-.vagrant
+.vagrant/
 
 # Vim Swap
 *.sw[p-z]
