@@ -36,13 +36,14 @@ Plugin 'tpope/vim-fugitive'
 " ----
 Plugin 'vimwiki/vimwiki'
 Plugin 'christianrondeau/vim-azure-log-analytics'
+Plugin 'machakann/vim-sandwich' " Like vim-surround
 " Plugin 'fatih/vim-go' ", { 'do': ':GoInstallBinaries' }
 " -- unused --
 " Plugin 'Xuyuanp/nerdtree-git-plugin'
 " Plugin 'Yggdroot/indentLine'
 " Plugin 'michaeljsmith/vim-indent-object'
 " Plugin 'nelstrom/vim-markdown-folding'
-" Plugin 'plasticboy/vim-markdown'
+Plugin 'plasticboy/vim-markdown'
 " Plugin 'pseewald/vim-anyfold'
 " Plugin 'scrooloose/nerdtree'
 " Plugin 'Xuyuanp/nerdtree-git-plugin'
@@ -57,7 +58,7 @@ set colorcolumn=
 "set nowrap
 " set encoding=utf-8
 " set nobomb " Don't use UTF-8 Byte Order Mark (BOM)
-set foldlevel=0 
+set foldlevel=0
 " set guifont=Consolas:h16
 " set guifont=Consolas:h15
 " set guifont=Roboto_Mono_for_Powerline:h16:cANSI
@@ -75,6 +76,83 @@ set writebackup
 " Break on Words
 set linebreak
 " scriptencoding utf-8
+" lightline ============================================================
+" A light and configurable statusline/tabline for Vim
+" lightline colorschemes:
+"   powerline (default)
+"   wombat
+"   jellybeans
+"   solarized dark
+"   solarized light
+"   PaperColor light
+"   seoul256
+"   Dracula
+"   one
+"   landscape
+let g:lightline = {
+      \ 'colorscheme': 'seoul256',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'fugitive', 'filename' ] ]
+      \ },
+      \ 'component_function': {
+      \   'fugitive': 'LightlineFugitive',
+      \   'readonly': 'LightlineReadonly',
+      \   'modified': 'LightlineModified',
+      \   'filename': 'LightlineFilename'
+      \ },
+      \ 'separator': { 'left': '', 'right': '' },
+      \ 'subseparator': { 'left': '|', 'right': '|' },
+      \ 'tabline': {
+      \   'left': [ [ 'tabs' ] ],
+      \   'right': [ [ 'close' ] ]
+      \ },
+      \ 'tab': {
+      \   'active': [ 'tabnum', 'filename', 'modified' ],
+      \   'inactive': [ 'tabnum', 'filename', 'modified' ]
+      \ },
+      \ 'enable': {
+      \   'statusline': 1,
+      \   'tabline': 1
+      \ }
+\ }
+
+function! LightlineModified()
+  if &filetype == "help"
+    return ""
+  elseif &modified
+    return "+"
+  elseif &modifiable
+    return ""
+  else
+    return ""
+  endif
+endfunction
+
+function! LightlineReadonly()
+  if &filetype == "help"
+    return ""
+  elseif &readonly
+    return "RO"
+  else
+    return ""
+  endif
+endfunction
+
+function! LightlineFugitive()
+  return exists('*fugitive#head') ? fugitive#head() : ''
+endfunction
+
+function! LightlineFilename()
+"      Second line in return statement used to be:
+"      \ ('' != expand('%:f:t') ? expand('%:f:t') : '[No Name]') .
+"      ... and only showed the file name.
+"      This one shows the parent directory name and the filename:
+"      \ ('' != expand('%:p:h:t').'/'.expand('%:t') ?  expand('%:p:h:t').'/'.expand('%:t') : '[No Name]') .
+  return ('' != LightlineReadonly() ? LightlineReadonly() . ' ' : '') .
+       \ ('' != expand('%:p:h:t').'/'.expand('%:t') ?  expand('%:p:h:t').'/'.expand('%:t') : '[No Name]') .
+       \ ('' != LightlineModified() ? ' ' . LightlineModified() : '')
+endfunction
 " Show Syntax Highlighting
 syntax on
 " ---------------------------------------------- Line Numbering
@@ -86,7 +164,7 @@ set number
 set relativenumber
 " ---------------------------------------------- Visual Indicators
 " Display Spaces, Tabs, et al Visibly, :set lcs, listchars
-set listchars=eol:$,space:·,tab:¦\ 
+set listchars=eol:$,space:·,tab:¦\
 " Show folding indicator in column
 set foldcolumn=1
 " Split vertically into new window on the bottom
@@ -131,10 +209,10 @@ nnoremap ; :
 " Make regex 'very magic mode' the default search (thanks Damian Conway)
 nnoremap / /\v
 " o-- UNUSED -----------------------------------------------------------
-" | " Map zt to zz - zz is faster than zt and I scroll to the top more often 
+" | " Map zt to zz - zz is faster than zt and I scroll to the top more often
 " | " than I scroll to the middle, which is what the zz default is
 " | " nnoremap zz zt
-" | " Map zt to zm - Think 'm' for middle; when swapped with zt, zt is 
+" | " Map zt to zm - Think 'm' for middle; when swapped with zt, zt is
 " | " slower and I don't use folding much anyway, which is the zm default
 " | " nnoremap zm zz
 nnoremap <C-A> ggVG
@@ -143,7 +221,7 @@ nnoremap <C-A> ggVG
 " Paste from Clipboard
 nnoremap <C-Y> "+P
 " Move down one horizontal split and resize to max
-nnoremap <C-N> <C-W>j<C-W>_ 
+nnoremap <C-N> <C-W>j<C-W>_
 " Move up one horizontal split and resize to max
 nnoremap <C-P> <C-W>k<C-W>_
 " Move left one vertical window split
@@ -197,6 +275,10 @@ nnoremap <leader>dd :ls<cr>:bd<home>
 nnoremap <leader>bd :ls<cr>:bd<space>
 " List Buffers and place cursor to switch
 nnoremap <leader>ll :ls<cr>:b<space>
+nnoremap <leader>ls :ls<cr>:b<space>
+" List Buffers and place cursor to split window
+nnoremap <leader>sb :ls<cr>:sbuffer<space>
+nnoremap <leader>vsb :ls<cr>:vertical :sbuffer<space>
 " ------------------------------------------- Keybindings - Command Mode
 " Paste from Clipboard
 cnoremap <C-Y> <C-R>*
@@ -239,7 +321,7 @@ inoremap <F4> <C-R>=strftime("%B %d, %Y")<CR>
 nnoremap <F5> "=strftime("%A, %B %d, %Y")<CR>p
 inoremap <F5> <C-R>=strftime("%A, %B %d, %Y")<CR>
 " ------------------------------------------------------------- Autocmds
-" Automatically change the current working directory to the path for the 
+" Automatically change the current working directory to the path for the
 " current file; Note: When this option is on some plugins may not work.
 " set autochdir
 " Sometimes, as an alternative to setting autochdir, the following
@@ -351,7 +433,7 @@ au BufNewFile,BufReadPost *.tf
     \ set expandtab |
     \ set autoindent
 " ---------------------------------------------------------------- YAML
-au BufNewFile,BufReadPost *.yml
+au BufNewFile,BufReadPost *.{yml,yaml}
     \ set filetype=yaml |
     \ set tabstop=2 |
     \ set softtabstop=2 |
@@ -359,18 +441,27 @@ au BufNewFile,BufReadPost *.yml
     \ set textwidth=0 |
     \ set expandtab |
     \ set autoindent
-" Vim Post Plugin Config================================================
+" plasticboy/vim-markdown ==============================================
+" https://github.com/plasticboy/vim-markdown
+let g:vim_markdown_new_list_item_indent = 2
+let g:vim_markdown_no_extensions_in_markdown = 1
+let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_conceal_code_blocks = 0
+let g:vim_markdown_fenced_languages = ['bash=sh', 'dosbatch', 'cmd=dosbatch', 'css', 'hcl=terraform', 'html', 'javascript', 'js=javascript', 'json=javascript', 'kql', 'kusto=kql', 'powershell=ps1', 'python', 'sh', 'sql', 'vb', 'vbscript=vb', 'yaml', 'yml=yaml', 'terraform', 'xml']
+let g:vim_markdown_follow_anchor = 1
+let g:vim_markdown_anchorexpr = "'<<'.v:anchor.'>>'"
+" Vim Post Plugin Config ===============================================
 " Highlighting - Cursor
 " highlight Cursor guifg=Black guibg=Yellow
 " highlight iCursor guifg=Black guibg=Yellow
 highlight Cursor guifg=#005f00 guibg=#afdf00
 highlight iCursor guifg=#005f00 guibg=#afdf00
 " Highlighting - Search
-" highlight IncSearch gui=bold guifg=#afdf00 guibg=#005f00 
+" highlight IncSearch gui=bold guifg=#afdf00 guibg=#005f00
 " highlight Search gui=bold guifg=#005f00 guibg=#afdf00
 " highlight Search gui=bold guifg=#005f00 guibg=#afdf00
 highlight IncSearch gui=bold guifg=#005f00 guibg=#afdf00
-highlight Search gui=bold guifg=#bfef00 guibg=#005f00 
+highlight Search gui=bold guifg=#bfef00 guibg=#005f00
 " set guicursor=n-v-c:block-Cursor
 " set guicursor+=i:ver100-iCursor
 " set guicursor+=n-v-c:blinkon0
