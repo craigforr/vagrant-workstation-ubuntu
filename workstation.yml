@@ -127,19 +127,31 @@
       line: "force_color_prompt=yes"
       state: present
 
-  # Non-Essential - For convenience when working in an interactive Bash session
-  - name: Working Directory in .bashrc
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^pushd.*code.*Set.current.working.directory"
-      line: "pushd ~/code/ # Set current working directory"
-      state: present
-
-  - name: Default Editor
+  - name: Vim is Default Editor
     alternatives:
       name: editor
       path: /usr/bin/vim.nox
       priority: 80
+
+  - name: Vundle Directory
+    file:
+      path: "/home/{{ localadmin }}/.vim/bundle/Vundle.vim"
+      state: directory
+      mode: '0755'
+    become: False
+
+  - name: Vundle Git Repository
+    git:
+      repo: 'https://github.com/VundleVim/Vundle.vim.git'
+      dest: "/home/{{ localadmin }}/.vim/bundle/Vundle.vim"
+      clone: True
+      update: True
+    become: False
+
+  - name: Vundle Plugins
+    shell:
+      vim +PluginInstall +qall
+    become: False
 
   - name: Azure CLI Prerequisite Software
     apt:
