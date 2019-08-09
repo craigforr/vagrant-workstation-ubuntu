@@ -29,6 +29,7 @@
       - python-dev
       - python-pip
       - renameutils
+      - tree
       - vim-nox
 
   - name: Python Packages (PIP)
