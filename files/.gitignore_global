@@ -1,0 +1,22 @@
+# Microsoft Office files
+*.doc[x]
+*.ppt[x]
+*.xlk
+*.xls[x]
+*.~vsd*
+~$*.doc*
+~$*.ppt*
+~$*.xls*
+
+# Vim Temporary
+*~
+.netrwhist
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Vim Persistent undo
+[._]*.un~
+

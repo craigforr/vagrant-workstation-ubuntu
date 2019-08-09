@@ -1,0 +1,21 @@
+[user]
+	email = cf@craigforrester.com
+	name = Craig Forrester
+[alias]
+	br = branch
+	ch = checkout
+	co = commit
+	ds = diff --staged
+	lol = log --graph --decorate --pretty=oneline --abbrev-commit --all
+	pp = push # Think: emacs "put"
+	pushd = push
+	rofl = log --pretty=\"format:%C(auto)%h %ai %Cblue%<(16)%cn<%ae> %Creset%s\"
+	st = status
+	ui = !gitk
+	unstage = reset HEAD --
+	yy = pull # Think: emacs "yank"
+[core]
+	editor = '/usr/bin/vim'
+	excludesfile = ~/.gitignore_global
+[credential]
+        helper = store
