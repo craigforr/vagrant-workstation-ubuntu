@@ -18,11 +18,12 @@ Vagrant.configure("2") do |config|
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AZURE_DEVOPS_TOKEN']}", destination: "/home/vagrant/.azure/azure_devops_token"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AWS_CREDENTIALS']}", destination: "/home/vagrant/.aws/credentials"
     workstation.vm.provision "file", source: "files/.bash_aliases", destination: "/home/vagrant/.bash_aliases"
-    workstation.vm.provision "file", source: "files/.vimrc", destination: "/home/vagrant/.vimrc"
     workstation.vm.provision "file", source: "files/.gitconfig", destination: "/home/vagrant/.config/git/config"
     workstation.vm.provision "file", source: "files/.gitignore_global", destination: "/home/vagrant/.gitignore_global"
-    workstation.vm.provision "file", source: "files/azure_config.ini", destination: "/home/vagrant/.azure/config"
     workstation.vm.provision "file", source: "files/.tmux.conf", destination: "/home/vagrant/.tmux.conf"
+    workstation.vm.provision "file", source: "files/.vimrc", destination: "/home/vagrant/.vimrc"
+    workstation.vm.provision "shell", path: "files/azcopy_install.sh"
+    workstation.vm.provision "file", source: "files/azure_config.ini", destination: "/home/vagrant/.azure/config"
     workstation.vm.synced_folder "/code", "/home/vagrant/code"
     workstation.vm.provider :virtualbox do |vb|
       vb.gui = false
