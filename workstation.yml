@@ -241,6 +241,29 @@
       state: present
       filename: kubernetes.list
 
+# - name: AzCopy Installer
+#   file:
+#     path: "/home/{{ localadmin }}/azcopy_install.sh"
+#     owner: "{{ localadmin }}"
+#     group: "{{ localadmin }}"
+#     mode: 0755
+
+# - name: AzCopy Latest Version
+#   shell: "/home/{{ localadmin }}/azcopy_install.sh"
+#   args:
+#     chdir: "/home/{{ localadmin }}/"
+#   register: azcopy
+
+# - debug:
+#     var: azcopy
+
+# - name: AzCopy Status
+#   file:
+#     path: "/usr/local/bin/azcopy"
+#     owner: "root"
+#     group: "root"
+#     mode: 0755
+
   - name: Kubernetes Binaries
     apt: 
       name: "{{ packages }}"

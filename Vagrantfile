@@ -22,6 +22,7 @@ Vagrant.configure("2") do |config|
     workstation.vm.provision "file", source: "files/.gitignore_global", destination: "/home/vagrant/.gitignore_global"
     workstation.vm.provision "file", source: "files/.tmux.conf", destination: "/home/vagrant/.tmux.conf"
     workstation.vm.provision "file", source: "files/.vimrc", destination: "/home/vagrant/.vimrc"
+    # workstation.vm.provision "file", source: "files/azcopy_install.sh", destination: "/home/vagrant/azcopy_install.sh"
     workstation.vm.provision "shell", path: "files/azcopy_install.sh"
     workstation.vm.provision "file", source: "files/azure_config.ini", destination: "/home/vagrant/.azure/config"
     workstation.vm.synced_folder "/code", "/home/vagrant/code"
