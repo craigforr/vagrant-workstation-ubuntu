@@ -1,3 +1,11 @@
+AZURE_CLI_CLIENT=$(grep client_id ~/.azure/credentials | cut -f2 -d'=')
+AZURE_CLI_SECRET=$(grep secret ~/.azure/credentials | cut -f2 -d'=')
+AZURE_CLI_TENANT=$(grep tenant ~/.azure/credentials | cut -f2 -d'=')
+
+function az_login() {
+  az login --service-principal -u $AZURE_CLI_CLIENT -p $AZURE_CLI_SECRET --tenant $AZURE_CLI_TENANT
+}
+
 # alias azsub="az account list -o table | grep -E '$|.*True$'"
 alias azsub="az account list --all --query 'sort_by([],&tenantId)|[].{Name:name,CloudName:cloudName,SubscriptionId:id,TenantId:tenantId,State:state,IsDefault:isDefault}' -o table | grep -E --color '^.*True.*|$'"
 alias azd="az devops" # Manage Azure DevOps organization level operations
