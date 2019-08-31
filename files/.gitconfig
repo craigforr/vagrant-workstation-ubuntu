@@ -18,4 +18,4 @@
 	editor = '/usr/bin/vim'
 	excludesfile = ~/.gitignore_global
 [credential]
-        helper = store
+  helper = store
