@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
     # workstation.vm.provision "file", source: "files/azcopy_install.sh", destination: "/home/vagrant/azcopy_install.sh"
     workstation.vm.provision "shell", path: "files/azcopy_install.sh"
     workstation.vm.provision "file", source: "files/azure_config.ini", destination: "/home/vagrant/.azure/config"
-    workstation.vm.synced_folder "/code", "/home/vagrant/code"
+    workstation.vm.synced_folder "#{ENV['VAGRANT_WORKSTATION_SHARED_DIR']}", "/home/vagrant/shared"
     workstation.vm.provider :virtualbox do |vb|
       vb.gui = false
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]

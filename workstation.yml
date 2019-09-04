@@ -105,12 +105,12 @@
       line: "source <(kubeadm completion bash)"
       state: present
 
-   - name: Verify kubectl Completion in .bashrc
-     lineinfile:
-       path: "/home/{{ localadmin }}/.bashrc"
-       regexp: ".*source.*kubectl.completion.bash."
-       line: "source <(kubectl completion bash)"
-       state: present
+  - name: Verify kubectl Completion in .bashrc
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: ".*source.*kubectl.completion.bash."
+      line: "source <(kubectl completion bash)"
+      state: present
 
   # Non-Essential - For convenience when working in an interactive Bash session
   - name: Prompt in .bashrc
@@ -177,7 +177,7 @@
       repo: deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ bionic main
       state: present
 
-  - name: Azure CLI 
+  - name: Azure CLI
     apt:
       name: "{{ packages }}"
       state: present
@@ -195,7 +195,7 @@
   - name: Azure DevOps CLI
     shell: 'az extension add --name azure-devops'
     when: azure_cli is defined and azure_cli.stat.executable
- 
+
   - name: Microsoft Repository GPG keys
     apt:
       deb: https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
@@ -266,13 +266,13 @@
 #     mode: 0755
 
   - name: Kubernetes Binaries
-    apt: 
+    apt:
       name: "{{ packages }}"
       state: present
       update_cache: yes
     vars:
       packages:
-        - kubeadm 
+        - kubeadm
         - kubectl
 
 ...
