@@ -18,15 +18,13 @@ Vagrant.configure("2") do |config|
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AZURE_DEVOPS_TOKEN']}", destination: "/home/vagrant/.azure/azure_devops_token"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AWS_CREDENTIALS']}", destination: "/home/vagrant/.aws/credentials"
     workstation.vm.provision "file", source: "files/.bash_aliases", destination: "/home/vagrant/.bash_aliases"
-#   TODO: Create a pre-populated .bash_history file for newly create VM:
-#   workstation.vm.provision "file", source: "files/.bash_history", destination: "/home/vagrant/.bash_history"
+    workstation.vm.provision "file", source: "files/.bash_history", destination: "/home/vagrant/.bash_history"
     workstation.vm.provision "file", source: "files/.gitconfig", destination: "/home/vagrant/.config/git/config"
     # Update this file with: curl -Lo files/.git-prompt.sh https://github.com/git/git/raw/master/contrib/completion/git-prompt.sh
     workstation.vm.provision "file", source: "files/.git-prompt.sh", destination: "/home/vagrant/.git-prompt.sh"
     workstation.vm.provision "file", source: "files/.gitignore_global", destination: "/home/vagrant/.gitignore_global"
     workstation.vm.provision "file", source: "files/.tmux.conf", destination: "/home/vagrant/.tmux.conf"
     workstation.vm.provision "file", source: "files/.vimrc", destination: "/home/vagrant/.vimrc"
-    # workstation.vm.provision "file", source: "files/azcopy_install.sh", destination: "/home/vagrant/azcopy_install.sh"
     workstation.vm.provision "shell", path: "files/azcopy_install.sh"
     workstation.vm.provision "file", source: "files/azure_config.ini", destination: "/home/vagrant/.azure/config"
     workstation.vm.synced_folder "#{ENV['VAGRANT_WORKSTATION_SHARED_DIR']}", "/home/vagrant/shared"
