@@ -42,6 +42,7 @@
       - requests-credssp
       - ansible[azure]
       - awscli
+      - aws-shell
       - yq
 
   - name: Private SSH Key Exists
