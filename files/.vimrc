@@ -209,10 +209,10 @@ nnoremap ; :
 " Make regex 'very magic mode' the default search (thanks Damian Conway)
 nnoremap / /\v
 " o-- UNUSED -----------------------------------------------------------
-" | " Map zt to zz - zz is faster than zt and I scroll to the top more often
+" | " Map zt to zz - zz is faster than zt and I scroll to the top more often 
 " | " than I scroll to the middle, which is what the zz default is
 " | " nnoremap zz zt
-" | " Map zt to zm - Think 'm' for middle; when swapped with zt, zt is
+" | " Map zt to zm - Think 'm' for middle; when swapped with zt, zt is 
 " | " slower and I don't use folding much anyway, which is the zm default
 " | " nnoremap zm zz
 nnoremap <C-A> ggVG
@@ -221,7 +221,7 @@ nnoremap <C-A> ggVG
 " Paste from Clipboard
 nnoremap <C-Y> "+P
 " Move down one horizontal split and resize to max
-nnoremap <C-N> <C-W>j<C-W>_
+nnoremap <C-N> <C-W>j<C-W>_ 
 " Move up one horizontal split and resize to max
 nnoremap <C-P> <C-W>k<C-W>_
 " Move left one vertical window split
@@ -234,39 +234,61 @@ nnoremap <C-K> <C-W>k
 nnoremap <C-L> <C-W>l
 " Mimic Windows Ctrl-S to Save
 nnoremap <C-S> :w<CR>
+nnoremap <A-S> :w!<CR>
 " Use Spacebar to pagedown, like a web browser
 nnoremap <Space> <PageDown>
 " Use Shift-Spacebar to pageup, like a web browser
 nnoremap <S-Space> <PageUp>
-" Use Ctrl-Backspace to clear search highlighting until the next search
-nnoremap <C-BS> :nohlsearch<CR>
-" Use Alt-Backspace to toggle colorcolumn at 80 chars
-nnoremap <M-BS> :let &cc = &cc == '' ? '80' : ''<CR>
+" Use Ctrl-Backspace to toggle search highlighting
+nnoremap <C-BS> :set invhlsearch<CR>
+" Use Alt-Backspace to clear search term
+nnoremap <A-BS> :let @/="空"<CR>
+" Use Alt-/ to toggle colorcolumn at 80 chars
+nnoremap <A-/> :let &cc = &cc == '' ? '80' : ''<CR>
 " Use Shift-Backspace to toggle word wrap
 nnoremap <S-BS> :set nowrap!<CR>
-" Use Ctrl-\ to toggle Relative Line Numbers
-nnoremap <C-\> :set invrnu<CR>
-" Use Alt-\ to toggle listchars to Display Spaces/Tabs Visibly
-nnoremap <M-\> :set invlist<CR>
+" Use Ctrl-\ to toggle Column Highlight at Cursor
+nnoremap <C-\> :set invcursorcolumn<CR>
+" Use Ctrl-\ to toggle Row Highlight at Cursor
+nnoremap <A-\> :set invcursorline<CR>
+" Use Alt-; to toggle Relative Line Numbers
+nnoremap <A-;> :set invrnu<CR>
+" Use Alt-' to toggle listchars to Display Invisible Characters
+nnoremap <A-'> :set invlist<CR>
+" Toggle pinning the cursorline to the middle of the window
+nnoremap <A-,> :let &scrolloff=999-&scrolloff<CR>
 " Cycle through Tabs
 nnoremap <C-Tab> :tabnext<CR>
 nnoremap <C-S-Tab> :tabprevious<CR>
-" Move Tab to the Beginning/First
-nnoremap <leader><Tab>h :0tabmove<CR>
-nnoremap <leader><Tab>0 :0tabmove<CR>
-nnoremap <leader><Tab>a :0tabmove<CR>
-" Move Tab to the End/Last
-nnoremap <leader><Tab>l :$tabmove<CR>
-nnoremap <leader><Tab>9 :$tabmove<CR>
-nnoremap <leader><Tab>e :$tabmove<CR>
+" Toggle Netrw File Explorer
+nnoremap <leader>e :call ToggleNetrw() <CR>
+" Show Tab List
+nnoremap <leader><Tab><Tab> :tabs<CR>
+" Go to the First Tab
+nnoremap <leader>0 :tabfirst<CR>
+" Go to the Last Tab (the 'Nth' tab)
+nnoremap <leader>9 :tablast<CR>
+" Go to the Previous Tab (Leftward)
+nnoremap <leader>k :tabprevious<CR>
+" Go to the Next Tab (Rightward)
+nnoremap <leader>j :tabnext<CR>
 " Move Tab to the Left
+nnoremap <leader><Tab>h :-tabmove<CR>
 nnoremap <leader><Tab>k :-tabmove<CR>
-nnoremap <leader><Tab>- :-tabmove<CR>
-nnoremap <leader><Tab>b :-tabmove<CR>
 " Move Tab to the Right
+nnoremap <leader><Tab>l :+tabmove<CR>
 nnoremap <leader><Tab>j :+tabmove<CR>
-nnoremap <leader><Tab>= :+tabmove<CR>
-nnoremap <leader><Tab>f :+tabmove<CR>
+" Move Tab to the Beginning/First
+nnoremap <leader><Tab>0 :0tabmove<CR>
+" Move Tab to the End/Last
+nnoremap <leader><Tab>$ :$tabmove<CR>
+" Open Existing Buffer in a New Tab
+nnoremap <leader><tab>tsb :ls<cr>:tab sb<space>
+" Open New Buffer in a New Tab
+nnoremap <leader><Tab>n :tabnew<space>
+nnoremap <leader>tn :tabnew<space>
+" List Buffers
+nnoremap <leader>bb :buffers<cr>:b<space>
 " Cycle through Buffers
 nnoremap <leader>bn :bnext<CR>
 nnoremap <leader>bp :bprevious<CR>
