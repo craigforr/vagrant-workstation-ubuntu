@@ -15,5 +15,25 @@ alias more='less -EFX'
 alias tree='tree -n'
 
 function az_login() {
+# Logs in with Azure CLI using Environment Variables
   az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_SECRET --tenant $AZURE_TENANT
+}
+
+function findami() {
+# Searches for an AWS AMI by ID and Region
+  REGION_DEFAULT='us-east-1'
+  if [[ "$1"x = 'x' ]] ; then
+    echo "Please specify an AMI ID."
+  else
+    if [[ "$2"x = 'x' ]] ; then
+      REGION="$2"
+    else
+      REGION="$REGION_DEFAULT"
+    fi
+    aws ec2 describe-images \
+        --image-id $AMI_ID \
+        --query "Images[*].Description[]" \
+        --output text \
+        --region $REGION
+  fi
 }
