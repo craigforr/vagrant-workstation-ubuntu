@@ -99,6 +99,13 @@
       line: "export AZURE_DEVOPS_EXT_PAT=$(echo ~/.azure/azure_devops_token)"
       state: present
 
+  - name: Verify AWS CLI Completion in .bashrc
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: "^complete..C..$(which aws_completer)..aws"
+      line: "complete -C \"$(which aws_completer)\" aws"
+      state: present
+
   - name: Verify kubeadm Completion in .bashrc
     lineinfile:
       path: "/home/{{ localadmin }}/.bashrc"
