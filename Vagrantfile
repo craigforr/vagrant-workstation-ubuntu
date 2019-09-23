@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
     workstation.vm.synced_folder "#{ENV['VAGRANT_WORKSTATION_SHARED_DIR']}", "/home/vagrant/shared"
     workstation.vm.provider :virtualbox do |vb|
       vb.gui = false
-      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
       vb.customize ["modifyvm", :id, "--memory", 1024]
       vb.customize ["modifyvm", :id, "--name", "ubu18ws1"]
     end
