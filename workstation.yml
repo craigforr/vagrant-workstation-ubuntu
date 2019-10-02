@@ -6,10 +6,9 @@
     localadmin: vagrant
   tasks:
 
-  - name: Existing Packages on Latest Version
-    apt:
-      update_cache: yes
-      upgrade: dist
+  - name: Security Updates Installed
+    shell: |
+      unattended-upgrade -d
 
   - name: Apt Software Packages
     apt:
