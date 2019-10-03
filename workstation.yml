@@ -9,6 +9,9 @@
   - name: Security Updates Installed
     shell: |
       unattended-upgrade -d
+    register: unattended_upgrade
+    changed_when: "'No packages found that can be upgraded' not in unattended_upgrade.stdout"
+    failed_when: unattended_upgrade.rc != 0
 
   - name: Apt Software Packages
     apt:
