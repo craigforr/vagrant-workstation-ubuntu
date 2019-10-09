@@ -90,7 +90,7 @@
   - name: Azure Profile Credentials Variable Export
     lineinfile:
       path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^export.AZURE_PROFILE=.*.azure/credentials"
+      regexp: "^export.AZURE_PROFILE=.*"
       line: "export AZURE_PROFILE=~/.azure/credentials"
       state: present
 
