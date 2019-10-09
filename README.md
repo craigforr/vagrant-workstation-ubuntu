@@ -2,6 +2,12 @@
 
 Ubuntu 18 Linux workstation for DevOps work.
 
+## Roadmap
+
+TODO:
+- [ ] Add Google Cloud SDK tools for use with Google Cloud Platform.
+- [ ] Add Vagrant definitions for Ansible test targets of differing OSes.
+
 ## Files
 
 ### Vagrantfile
