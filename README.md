@@ -19,7 +19,13 @@ The Vagrantfile contains a number of environment variables that should each cont
 Environment Variable Example:
 
 ```dosbatch
+:: Windows Command
 setx VAGRANT_WORKSTATION_ANSIBLE_VAULT_SECRET "C:/Users/Alice/.vault_password"
+```
+
+```bash
+# Linux Command - Adds variable to .bashrc
+echo 'export VAGRANT_WORKSTATION_ANSIBLE_VAULT_SECRET="/home/alice/.vault_password"' >> ~/.bashrc
 ```
 
 Vagrantfile Example:
