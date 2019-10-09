@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Downloads and installs AzCopy (v10) for Linux
+
 current_userid=$(id -u)
 if [ $current_userid -ne 0 ]; then
   echo "This script requires root privileges to run"
