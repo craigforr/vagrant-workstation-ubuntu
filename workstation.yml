@@ -205,6 +205,10 @@
   - name: Azure DevOps CLI
     shell: 'az extension add --name azure-devops'
     when: azure_cli is defined and azure_cli.stat.executable
+    register: azure_cli_devops
+
+  - debug:
+      var: azure_cli_devops
 
   - name: Microsoft Repository GPG keys
     apt:
