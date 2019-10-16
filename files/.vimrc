@@ -351,6 +351,9 @@ inoremap <F5> <C-R>=strftime("%A, %B %d, %Y")<CR>
 autocmd BufEnter * silent! lcd %:p:h
 " Git Commit files
 autocmd Filetype gitcommit setlocal cc=50,72 tw=72
+" ============================================================= Commands
+" Format current buffer as JSON with 4 space indents
+command! FormatJSON %!jq --indent 4 .
 " ------------------------------------------------------------ Go/Golang
 au BufNewFile,BufReadPost *.go
     \ set filetype=go |
@@ -472,6 +475,8 @@ let g:vim_markdown_conceal_code_blocks = 0
 let g:vim_markdown_fenced_languages = ['bash=sh', 'dosbatch', 'cmd=dosbatch', 'css', 'hcl=terraform', 'html', 'javascript', 'js=javascript', 'json=javascript', 'kql', 'kusto=kql', 'powershell=ps1', 'python', 'sh', 'sql', 'vb', 'vbscript=vb', 'yaml', 'yml=yaml', 'terraform', 'xml']
 let g:vim_markdown_follow_anchor = 1
 let g:vim_markdown_anchorexpr = "'<<'.v:anchor.'>>'"
+" vim-json =============================================================
+let g:vim_json_syntax_conceal = 0
 " Vim Post Plugin Config ===============================================
 " Highlighting - Cursor
 " highlight Cursor guifg=Black guibg=Yellow
