@@ -6,6 +6,30 @@
     localadmin: vagrant
   tasks:
 
+  - name: Prerequisite Apt Software Packages over HTTPS
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+        - apt-transport-https
+        - ca-certificates
+
+  - name: Apt Signing Key for Google
+    apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      state: present
+    register: apt_key_google
+
+  - debug:
+      var: apt_key_google
+
+  - name: Apt Signing Key for Microsoft
+    apt_key:
+      url: https://packages.microsoft.com/keys/microsoft.asc
+      state: present
+
   - name: Security Updates Installed
     shell: |
       unattended-upgrade -d
@@ -45,6 +69,7 @@
       - ansible[azure]
       - awscli
       - aws-shell
+      - boto3
       - yq
 
   - name: Private SSH Key Exists
@@ -127,8 +152,7 @@
     lineinfile:
       path: "/home/{{ localadmin }}/.bashrc"
       regexp: "^PS1=.*"
-      line: "PS1='\\n\\[\\033[36m\\]\\W\\n\\[\\033[0m\\]$ \\[\\033[0m\\]'"
-      # line: \"PS1='\\n\\[\\033[36m\\]\\W\\[\\033[32m\\]$(__git_ps1 \" (%s)\")\\n\\[\\033[0m\\]$ \\[\\033[0m\\]'
+      line: "PS1='\\n\\[\\033[36m\\]\\W\\[\\033[31m\\]$(__git_ps1 \" (%s)\")\\n\\[\\033[0m\\]$ \\[\\033[0m\\]'"
       state: present
 
   # Non-Essential - For convenience when working in an interactive Bash session
@@ -175,11 +199,6 @@
       - apt-transport-https
       - lsb-release
       - gnupg
-
-  - name: Microsoft Apt Signing Key
-    apt_key:
-      url: https://packages.microsoft.com/keys/microsoft.asc
-      state: present
 
   - name: Microsoft Azure CLI Apt Repository
     apt_repository:
@@ -245,10 +264,6 @@
       executable: /usr/bin/pwsh
     when: azure_powershell.stat.isdir is defined and azure_powershell.stat.isdir != True
 
-  - name: Apt Signing Key for Kubernetes
-    apt_key:
-      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-      state: present
 
   - name: Apt Repository for Kubernetes
     apt_repository:
