@@ -252,18 +252,20 @@
   - name: Azure PowerShell Modules Path
     stat:
       path: "/home/{{ localadmin }}/.local/share/powershell/Modules/Az"
-    when: azure_powershell.stat.isdir is not defined
     register: azure_powershell
 
-# - debug:
-#     var: azure_powershell
+  - debug:
+      var: azure_powershell
 
   - name: Azure PowerShell Modules
     shell: 'Install-Module -Name Az -AllowClobber -Force'
     args:
       executable: /usr/bin/pwsh
-    when: azure_powershell.stat.isdir is defined and azure_powershell.stat.isdir != True
+    when: azure_powershell.stat.exists == False
+    register: azure_powershell_install
 
+  - debug:
+      var: azure_powershell_install
 
   - name: Apt Repository for Kubernetes
     apt_repository:
