@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
     workstation.vm.provision "file", source: "files/.vimrc", destination: "/home/vagrant/.vimrc"
     workstation.vm.provision "shell", path: "files/azcopy_install.sh"
     workstation.vm.provision "file", source: "files/azure_config.ini", destination: "/home/vagrant/.azure/config"
+    workstation.vm.provision "file", source: "files/aws_config.ini", destination: "/home/vagrant/.aws/config"
     workstation.vm.synced_folder "#{ENV['VAGRANT_WORKSTATION_SHARED_DIR']}", "/home/vagrant/shared"
     workstation.vm.provider :virtualbox do |vb|
       vb.gui = false
