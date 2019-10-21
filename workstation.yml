@@ -156,6 +156,14 @@
       state: present
 
   # Non-Essential - For convenience when working in an interactive Bash session
+  - name: Tab Menu Complete in .bashrc
+    lineinfile:
+      path: "/home/{{ localadmin }}/.bashrc"
+      regexp: "^bind.TAB.menu.complete.*"
+      line: "bind TAB:menu-complete"
+      state: present
+
+  # Non-Essential - For convenience when working in an interactive Bash session
   - name: Prompt in .bashrc
     lineinfile:
       path: "/home/{{ localadmin }}/.bashrc"
