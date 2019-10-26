@@ -13,10 +13,10 @@ Vagrant.configure("2") do |config|
     workstation.vm.box = "ubuntu/bionic64"
     workstation.vm.hostname = 'ubu18ws1'
     workstation.vm.network :private_network, ip: "192.168.56.11"
-    workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_ANSIBLE_VAULT_SECRET']}", destination: "/home/vagrant/.ansible/.vault_password"
-    workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AZURE_CREDENTIALS']}", destination: "/home/vagrant/.azure/credentials"
-    workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AZURE_DEVOPS_TOKEN']}", destination: "/home/vagrant/.azure/azure_devops_token"
-    workstation.vm.provision "file", source: "#{ENV['VAGRANT_WORKSTATION_AWS_CREDENTIALS']}", destination: "/home/vagrant/.aws/credentials"
+    workstation.vm.provision "file", source: "#{ENV['VAGRANT_ANSIBLE_VAULT_SECRET']}", destination: "/home/vagrant/.ansible/.vault_password"
+    workstation.vm.provision "file", source: "#{ENV['VAGRANT_AZURE_CREDENTIALS']}", destination: "/home/vagrant/.azure/credentials"
+    workstation.vm.provision "file", source: "#{ENV['VAGRANT_AZURE_DEVOPS_TOKEN']}", destination: "/home/vagrant/.azure/azure_devops_token"
+    workstation.vm.provision "file", source: "#{ENV['VAGRANT_AWS_CREDENTIALS']}", destination: "/home/vagrant/.aws/credentials"
     workstation.vm.provision "file", source: "files/.bash_aliases", destination: "/home/vagrant/.bash_aliases"
     workstation.vm.provision "file", source: "files/.bash_history", destination: "/home/vagrant/.bash_history"
     workstation.vm.provision "file", source: "files/.gitconfig", destination: "/home/vagrant/.config/git/config"
@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
     workstation.vm.provision "shell", path: "files/azcopy_install.sh"
     workstation.vm.provision "file", source: "files/azure_config.ini", destination: "/home/vagrant/.azure/config"
     workstation.vm.provision "file", source: "files/aws_config.ini", destination: "/home/vagrant/.aws/config"
-    workstation.vm.synced_folder "#{ENV['VAGRANT_WORKSTATION_SHARED_DIR']}", "/home/vagrant/shared"
+    workstation.vm.synced_folder "#{ENV['VAGRANT_SHARED_DIR']}", "/home/vagrant/shared"
     workstation.vm.provider :virtualbox do |vb|
       vb.gui = false
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
