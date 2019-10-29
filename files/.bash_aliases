@@ -13,6 +13,8 @@ alias la='ll -a --color=never'
 alias ll='ls -lF --color=never --time-style="+%Y-%m-%d %H:%M" --group-directories-first'
 alias more='less -EFX'
 alias tree='tree -n'
+alias json2yaml="python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)'"
+alias j2y='json2yaml'
 
 # function azlogin() {
 # # Logs in with Azure CLI using Environment Variables
