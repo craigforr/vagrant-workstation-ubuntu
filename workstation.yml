@@ -6,6 +6,9 @@
     localadmin: vagrant
   tasks:
 
+  - debug:
+      var: ansible_facts
+
   - name: Prerequisite Apt Software Packages over HTTPS
     apt:
       name: "{{ packages }}"
@@ -22,12 +25,37 @@
       state: present
     register: apt_key_google
 
-  - debug:
-      var: apt_key_google
+# - debug:
+#     var: apt_key_google
 
   - name: Apt Signing Key for Microsoft
     apt_key:
       url: https://packages.microsoft.com/keys/microsoft.asc
+      state: present
+
+  - name: GPG Keys for Microsoft Package Repository
+    apt:
+      deb: https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
+
+# - name: Apt Repository for Google Cloud SDK
+#   apt_repository:
+#     # deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" |
+#     #   sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+#     repo: deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main
+#     state: present
+
+# - name: Apt Repository for Kubernetes
+#   apt_repository:
+#     # repo: "deb https://apt.kubernetes.io/ kubernetes-{{ ansible_facts['distribution_release'] }} main"
+#     repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+#     state: present
+#     filename: kubernetes.list
+#   register: apt_repo_kubernetes
+
+  - name: Apt Repository for Microsoft Azure CLI
+    apt_repository:
+      # repo: deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_local['ansible_lsb']['codename'] }} main
+      repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_facts['distribution_release'] }} main"
       state: present
 
   - name: Security Updates Installed
@@ -55,8 +83,15 @@
       - python-dev
       - python-pip
       - renameutils
+      - snap
       - tree
       - vim-nox
+
+# Alternative PIP Installation Method
+# - name: Python PIP
+#   shell: |
+#     curl -s https://bootstrap.pypa.io/get-pip.py | python
+#   register: pip_install
 
   - name: Python Packages (PIP)
     pip:
@@ -72,24 +107,31 @@
       - boto3
       - yq
 
-  - name: Private SSH Key Exists
-    stat:
-      path: "/home/{{ localadmin }}/.ssh/id_rsa"
-    register: ssh_key
-
-  - name: Generate SSH Keys if Non-Existent
-    shell: |
-      ssh-keygen -b 2048 -t rsa -f "/home/{{ localadmin }}/.ssh/id_rsa" -q -N "" -C ""
-    when: ssh_key.stat.exists == False
-    # become_user: "{{ localadmin }}"
-    # become: true
-
-  - name: SSH Key Permissions
-    file:
-      path: "/home/{{ localadmin }}/.ssh/id_rsa"
+  - name: Open SSH Key Pair
+    openssh_keypair:
       owner: "{{ localadmin }}"
-      group: "{{ localadmin }}"
-      mode: 0600
+      path: "/home/{{ localadmin }}/.ssh/id_rsa"
+      size: 4096
+      type: rsa
+
+# - name: Private SSH Key Exists
+#   stat:
+#     path: "/home/{{ localadmin }}/.ssh/id_rsa"
+#   register: ssh_key
+
+# - name: Generate SSH Keys if Non-Existent
+#   shell: |
+#     ssh-keygen -b 2048 -t rsa -f "/home/{{ localadmin }}/.ssh/id_rsa" -q -N "" -C ""
+#   when: ssh_key.stat.exists == False
+#   # become_user: "{{ localadmin }}"
+#   # become: true
+
+# - name: SSH Key Permissions
+#   file:
+#     path: "/home/{{ localadmin }}/.ssh/id_rsa"
+#     owner: "{{ localadmin }}"
+#     group: "{{ localadmin }}"
+#     mode: 0600
 
   - name: Ansible Vault Password File Ownership and Permissions
     file:
@@ -208,12 +250,6 @@
       - lsb-release
       - gnupg
 
-  - name: Microsoft Azure CLI Apt Repository
-    apt_repository:
-      # repo: deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_local['ansible_lsb']['codename'] }} main
-      repo: deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ bionic main
-      state: present
-
   - name: Azure CLI
     apt:
       name: "{{ packages }}"
@@ -236,10 +272,6 @@
 
   - debug:
       var: azure_cli_devops
-
-  - name: Microsoft Repository GPG keys
-    apt:
-      deb: https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
 
   - name: PowerShell Core
     apt:
