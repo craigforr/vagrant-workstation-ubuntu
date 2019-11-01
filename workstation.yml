@@ -357,14 +357,13 @@
 #     group: "root"
 #     mode: 0755
 
-  - name: Kubernetes Binaries
-    apt:
-      name: "{{ packages }}"
-      state: present
-      update_cache: yes
-    vars:
-      packages:
-        - kubeadm
-        - kubectl
+
+  - name: Snap Packages
+    snap:
+      name:
+      - kubeadm
+      - kubectl
+      classic: true
+
 
 ...
