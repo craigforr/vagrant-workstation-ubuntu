@@ -288,30 +288,51 @@
     shell: 'Install-Module -Name PowerShellGet -Force'
     args:
       executable: /usr/bin/pwsh
+    become: false
 
   - name: Azure PowerShell Modules Path
-    stat:
-      path: "/home/{{ localadmin }}/.local/share/powershell/Modules/Az"
+    shell: "Test-Path /home/{{ localadmin }}/.local/share/powershell/Modules/Az"
+    args:
+      executable: /usr/bin/pwsh
+    become: false
+    changed_when: false
     register: azure_powershell
 
-  - debug:
-      var: azure_powershell
+# - debug:
+#     var: azure_powershell
 
   - name: Azure PowerShell Modules
     shell: 'Install-Module -Name Az -AllowClobber -Force'
     args:
       executable: /usr/bin/pwsh
-    when: azure_powershell.stat.exists == False
+    when: azure_powershell.stdout == 'False'
     register: azure_powershell_install
+    become: false
 
-  - debug:
-      var: azure_powershell_install
+# - debug:
+#     var: azure_powershell_install
 
-  - name: Apt Repository for Kubernetes
-    apt_repository:
-      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
-      state: present
-      filename: kubernetes.list
+  - name: AWS PowerShell NetCore Modules Path
+    shell: "Test-Path /home/{{ localadmin }}/.local/share/powershell/Modules/AWSPowerShell.NetCore"
+    args:
+      executable: /usr/bin/pwsh
+    become: false
+    changed_when: false
+    register: aws_powershell
+
+# - debug:
+#     var: aws_powershell
+
+  - name: AWS PowerShell NetCore Modules
+    shell: 'Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force'
+    args:
+      executable: /usr/bin/pwsh
+    when: aws_powershell.stdout == 'False'
+    register: aws_powershell_install
+    become: false
+
+# - debug:
+#     var: aws_powershell_install
 
 # - name: AzCopy Installer
 #   file:
