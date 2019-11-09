@@ -357,13 +357,11 @@
 #     group: "root"
 #     mode: 0755
 
-
   - name: Snap Packages
     snap:
       name:
+      - helm
       - kubeadm
       - kubectl
       classic: true
-
-
 ...
