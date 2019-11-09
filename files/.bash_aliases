@@ -1,3 +1,6 @@
+bind TAB:menu-complete
+bind '"\ew": shell-backward-kill-word'
+
 # export AZURE_CLIENT_ID=$(awk -F "=" '/client_id/ {print $2}' ~/.azure/credentials)
 # export AZURE_SECRET=$(awk -F "=" '/secret/ {print $2}' ~/.azure/credentials)
 # export AZURE_SUBSCRIPTION_ID=$(awk -F "=" '/subscription_id/ {print $2}' ~/.azure/credentials)
