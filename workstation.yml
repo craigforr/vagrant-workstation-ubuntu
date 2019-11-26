@@ -269,6 +269,7 @@
   # https://github.com/Azure/azure-devops-cli-extension
   - name: Azure DevOps CLI
     shell: 'az extension add --name azure-devops'
+    become: false
     when: azure_cli is defined and azure_cli.stat.executable
     register: azure_cli_devops
 
