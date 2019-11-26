@@ -109,6 +109,11 @@
       - boto3
       - yq
 
+  - name: SSH Directory
+    file:
+      name: "/home/{{ localadmin }}/.ssh"
+      state: directory
+
   - name: Open SSH Key Pair
     openssh_keypair:
       owner: "{{ localadmin }}"
