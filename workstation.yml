@@ -4,386 +4,402 @@
   become: true # Default become_user is root
   vars:
     localadmin: vagrant
+    ansible_host_key_checking: False
   tasks:
 
-  - debug:
-      var: ansible_facts
+    - debug:
+        var: ansible_facts
 
-  - name: Prerequisite Apt Software Packages over HTTPS
-    apt:
-      name: "{{ packages }}"
-      state: present
-      update_cache: yes
-    vars:
-      packages:
+    - name: Prerequisite Apt Software Packages over HTTPS
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - apt-transport-https
+          - ca-certificates
+
+    - name: Apt Signing Key for Google
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+      register: apt_key_google
+
+#   - debug:
+#       var: apt_key_google
+
+    - name: Apt Signing Key for Microsoft
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: GPG Keys for Microsoft Package Repository
+      apt:
+        deb: https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
+
+#   - name: Apt Repository for Google Cloud SDK
+#     apt_repository:
+#       # deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" |
+#       #   sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+#       repo: deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main
+#       state: present
+
+#   - name: Apt Repository for Kubernetes
+#     apt_repository:
+#       # repo: "deb https://apt.kubernetes.io/ kubernetes-{{ ansible_facts['distribution_release'] }} main"
+#       repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+#       state: present
+#       filename: kubernetes.list
+#     register: apt_repo_kubernetes
+
+    - name: Apt Repository for Microsoft Azure CLI
+      apt_repository:
+        # repo: deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_local['ansible_lsb']['codename'] }} main
+        repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_facts['distribution_release'] }} main"
+        state: present
+
+    - name: Security Updates Installed
+      shell: |
+        unattended-upgrade -d
+      register: unattended_upgrade
+      changed_when: "'No packages found that can be upgraded' not in unattended_upgrade.stdout"
+      failed_when: unattended_upgrade.rc != 0
+
+    - name: Apt Software Packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - ansible
+          - bash-completion
+          - gcc
+          - ipcalc
+          - jq
+          - libkrb5-dev
+          - libssl-dev
+          - python-apt
+          - python-dev
+          - python-pip
+          - renameutils
+          - rlwrap
+          - snap
+          - tree
+          - vim-nox
+          - xsel
+
+#   Alternative PIP Installation Method
+#   - name: Python PIP
+#     shell: |
+#       curl -s https://bootstrap.pypa.io/get-pip.py | python
+#     register: pip_install
+
+    - name: Python Packages (PIP)
+      pip:
+        name:
+        - ansible[azure]
+        - aws-shell
+        - awscli
+        - boto3
+        - pymongo
+        - pywinrm>=0.3.0
+        - pywinrm[credssp]
+        - pywinrm[kerberos]
+        - requests-credssp
+        - requests-kerberos
+        - yq
+
+    - name: SSH Directory
+      file:
+        name: "/home/{{ localadmin }}/.ssh"
+        state: directory
+
+    - name: Private SSH Key for Ansible
+      file:
+        path: "/home/{{ localadmin }}/.ssh/vagrant_rsa"
+        owner: "{{ localadmin }}"
+        group: "{{ localadmin }}"
+        mode: 0600
+
+    - name: Open SSH Key Pair
+      openssh_keypair:
+        owner: "{{ localadmin }}"
+        path: "/home/{{ localadmin }}/.ssh/id_rsa"
+        size: 4096
+        type: rsa
+
+#   - name: Private SSH Key Exists
+#     stat:
+#       path: "/home/{{ localadmin }}/.ssh/id_rsa"
+#     register: ssh_key
+
+#   - name: Generate SSH Keys if Non-Existent
+#     shell: |
+#       ssh-keygen -b 2048 -t rsa -f "/home/{{ localadmin }}/.ssh/id_rsa" -q -N "" -C ""
+#     when: ssh_key.stat.exists == False
+#     # become_user: "{{ localadmin }}"
+#     # become: true
+
+#   - name: SSH Key Permissions
+#     file:
+#       path: "/home/{{ localadmin }}/.ssh/id_rsa"
+#       owner: "{{ localadmin }}"
+#       group: "{{ localadmin }}"
+#       mode: 0600
+
+    - name: Ansible Vault Password File Ownership and Permissions
+      file:
+        path: "/home/{{ localadmin }}/.ansible/.vault_password"
+        owner: "{{ localadmin }}"
+        group: "{{ localadmin }}"
+        mode: 0600
+
+    - name: Ansible Configuration Variable Export
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^export.ANSIBLE_CONFIG=.*"
+        line: "export ANSIBLE_CONFIG=~/.ansible.cfg"
+        state: present
+
+    - name: Ansible Vault Password Variable Export
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^export.ANSIBLE_VAULT_PASSWORD_FILE=.*.ansible/.vault_password"
+        line: "export ANSIBLE_VAULT_PASSWORD_FILE=~/.ansible/.vault_password"
+        state: present
+
+    - name: Ansible Host Key Checking Variable Export
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^export.ANSIBLE_HOST_KEY_CHECKING.*"
+        line: "export ANSIBLE_HOST_KEY_CHECKING={{ ansible_host_key_checking }}"
+        state: present
+
+    - name: Azure Profile Credentials Variable Export
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^export.AZURE_PROFILE=.*"
+        line: "export AZURE_PROFILE=~/.azure/credentials"
+        state: present
+
+    - name: Azure DevOps Profile Credentials Variable Export
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^export.AZURE_DEVOPS_EXT_PAT=.*"
+        line: "export AZURE_DEVOPS_EXT_PAT=$(echo ~/.azure/azure_devops_token)"
+        state: present
+
+    - name: Verify AWS CLI Completion in .bashrc
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^complete..C..$(which aws_completer)..aws"
+        line: "complete -C \"$(which aws_completer)\" aws"
+        state: present
+
+    - name: Verify kubeadm Completion in .bashrc
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: ".*source.*kubeadm.completion.bash."
+        line: "source <(kubeadm completion bash)"
+        state: present
+
+    - name: Verify kubectl Completion in .bashrc
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: ".*source.*kubectl.completion.bash."
+        line: "source <(kubectl completion bash)"
+        state: present
+
+    # Non-Essential - For convenience when working in an interactive Bash session
+    - name: Prompt in .bashrc
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^PS1=.*"
+        line: "PS1='\\n\\[\\033[36m\\]\\W\\[\\033[31m\\]$(__git_ps1 \" (%s)\")\\n\\[\\033[0m\\]\\u@\\h\\$ \\[\\033[0m\\]'"
+        state: present
+
+    # Non-Essential - For convenience when working in an interactive Bash session
+    - name: Tab Menu Complete in .bashrc
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^bind.TAB.menu.complete.*"
+        line: "bind TAB:menu-complete"
+        state: present
+
+    # Non-Essential - For convenience when working in an interactive Bash session
+    - name: Prompt in .bashrc
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: ".*force_color_prompt=.*"
+        line: "force_color_prompt=yes"
+        state: present
+
+    - name: Vim is Default Editor
+      alternatives:
+        name: editor
+        path: /usr/bin/vim.nox
+        priority: 80
+
+    - name: Vundle Directory
+      file:
+        path: "/home/{{ localadmin }}/.vim/bundle/Vundle.vim"
+        state: directory
+        mode: '0755'
+      become: False
+
+    - name: Vundle Git Repository
+      git:
+        repo: 'https://github.com/VundleVim/Vundle.vim.git'
+        dest: "/home/{{ localadmin }}/.vim/bundle/Vundle.vim"
+        clone: True
+        update: True
+      become: False
+
+    - name: Vundle Plugins
+      shell:
+        vim +PluginInstall +qall
+      become: False
+
+    - name: Azure CLI Prerequisite Software
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
         - apt-transport-https
-        - ca-certificates
+        - lsb-release
+        - gnupg
 
-  - name: Apt Signing Key for Google
-    apt_key:
-      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-      state: present
-    register: apt_key_google
+    - name: Azure CLI
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+        - azure-cli
 
-# - debug:
-#     var: apt_key_google
+    - stat:
+        path: /usr/bin/az
+      register: azure_cli
 
-  - name: Apt Signing Key for Microsoft
-    apt_key:
-      url: https://packages.microsoft.com/keys/microsoft.asc
-      state: present
+    # Azure DevOps Extension for Azure CLI
+    # https://github.com/Azure/azure-devops-cli-extension
+    - name: Azure DevOps CLI
+      shell: 'az extension add --name azure-devops'
+      become: false
+      when: azure_cli is defined and azure_cli.stat.executable
+      register: azure_cli_devops
 
-  - name: GPG Keys for Microsoft Package Repository
-    apt:
-      deb: https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
+    - debug:
+        var: azure_cli_devops
 
-# - name: Apt Repository for Google Cloud SDK
-#   apt_repository:
-#     # deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" |
-#     #   sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-#     repo: deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main
-#     state: present
+    - name: PowerShell Core
+      apt:
+        name: powershell
+        state: present
+        update_cache: yes
 
-# - name: Apt Repository for Kubernetes
-#   apt_repository:
-#     # repo: "deb https://apt.kubernetes.io/ kubernetes-{{ ansible_facts['distribution_release'] }} main"
-#     repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
-#     state: present
-#     filename: kubernetes.list
-#   register: apt_repo_kubernetes
+    - name: PowerShell Trusted Repository - PSGallery
+      shell: 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
+      args:
+        executable: /usr/bin/pwsh
 
-  - name: Apt Repository for Microsoft Azure CLI
-    apt_repository:
-      # repo: deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_local['ansible_lsb']['codename'] }} main
-      repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_facts['distribution_release'] }} main"
-      state: present
+    - name: PowerShell Module - PowerShellGet
+      shell: 'Install-Module -Name PowerShellGet -Force'
+      args:
+        executable: /usr/bin/pwsh
+      become: false
 
-  - name: Security Updates Installed
-    shell: |
-      unattended-upgrade -d
-    register: unattended_upgrade
-    changed_when: "'No packages found that can be upgraded' not in unattended_upgrade.stdout"
-    failed_when: unattended_upgrade.rc != 0
+    - name: Azure PowerShell Modules Path
+      shell: "Test-Path /home/{{ localadmin }}/.local/share/powershell/Modules/Az"
+      args:
+        executable: /usr/bin/pwsh
+      become: false
+      changed_when: false
+      register: azure_powershell
 
-  - name: Apt Software Packages
-    apt:
-      name: "{{ packages }}"
-      state: present
-      update_cache: yes
-    vars:
-      packages:
-      - ansible
-      - bash-completion
-      - gcc
-      - ipcalc
-      - jq
-      - libkrb5-dev
-      - libssl-dev
-      - python-apt
-      - python-dev
-      - python-pip
-      - renameutils
-      - rlwrap
-      - snap
-      - tree
-      - vim-nox
-      - xsel
+#   - debug:
+#       var: azure_powershell
 
-# Alternative PIP Installation Method
-# - name: Python PIP
-#   shell: |
-#     curl -s https://bootstrap.pypa.io/get-pip.py | python
-#   register: pip_install
+    - name: Azure PowerShell Modules
+      shell: 'Install-Module -Name Az -AllowClobber -Force'
+      args:
+        executable: /usr/bin/pwsh
+      when: azure_powershell.stdout == 'False'
+      register: azure_powershell_install
+      become: false
 
-  - name: Python Packages (PIP)
-    pip:
-      name:
-      - pywinrm>=0.3.0
-      - pywinrm[kerberos]
-      - pywinrm[credssp]
-      - requests-kerberos
-      - requests-credssp
-      - ansible[azure]
-      - awscli
-      - aws-shell
-      - boto3
-      - yq
+#   - debug:
+#       var: azure_powershell_install
 
-  - name: SSH Directory
-    file:
-      name: "/home/{{ localadmin }}/.ssh"
-      state: directory
+    - name: AWS PowerShell NetCore Modules Path
+      shell: "Test-Path /home/{{ localadmin }}/.local/share/powershell/Modules/AWSPowerShell.NetCore"
+      args:
+        executable: /usr/bin/pwsh
+      become: false
+      changed_when: false
+      register: aws_powershell
 
-  - name: Open SSH Key Pair
-    openssh_keypair:
-      owner: "{{ localadmin }}"
-      path: "/home/{{ localadmin }}/.ssh/id_rsa"
-      size: 4096
-      type: rsa
+#   - debug:
+#       var: aws_powershell
 
-# - name: Private SSH Key Exists
-#   stat:
-#     path: "/home/{{ localadmin }}/.ssh/id_rsa"
-#   register: ssh_key
+    - name: AWS PowerShell NetCore Modules
+      shell: 'Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force'
+      args:
+        executable: /usr/bin/pwsh
+      when: aws_powershell.stdout == 'False'
+      register: aws_powershell_install
+      become: false
 
-# - name: Generate SSH Keys if Non-Existent
-#   shell: |
-#     ssh-keygen -b 2048 -t rsa -f "/home/{{ localadmin }}/.ssh/id_rsa" -q -N "" -C ""
-#   when: ssh_key.stat.exists == False
-#   # become_user: "{{ localadmin }}"
-#   # become: true
+#   - debug:
+#       var: aws_powershell_install
 
-# - name: SSH Key Permissions
-#   file:
-#     path: "/home/{{ localadmin }}/.ssh/id_rsa"
-#     owner: "{{ localadmin }}"
-#     group: "{{ localadmin }}"
-#     mode: 0600
+#   - name: AzCopy Installer
+#     file:
+#       path: "/home/{{ localadmin }}/azcopy_install.sh"
+#       owner: "{{ localadmin }}"
+#       group: "{{ localadmin }}"
+#       mode: 0755
 
-  - name: Ansible Vault Password File Ownership and Permissions
-    file:
-      path: "/home/{{ localadmin }}/.ansible/.vault_password"
-      owner: "{{ localadmin }}"
-      group: "{{ localadmin }}"
-      mode: 0600
+#   - name: AzCopy Latest Version
+#     shell: "/home/{{ localadmin }}/azcopy_install.sh"
+#     args:
+#       chdir: "/home/{{ localadmin }}/"
+#     register: azcopy
 
-  - name: Ansible Vault Password Variable Export
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^export.ANSIBLE_VAULT_PASSWORD_FILE=.*.ansible/.vault_password"
-      line: "export ANSIBLE_VAULT_PASSWORD_FILE=~/.ansible/.vault_password"
-      state: present
+#   - debug:
+#       var: azcopy
 
-  - name: Ansible Host Key Checking Variable Export
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^export.ANSIBLE_HOST_KEY_CHECKING.*"
-      line: "export ANSIBLE_HOST_KEY_CHECKING=False"
-      state: present
+#   - name: AzCopy Status
+#     file:
+#       path: "/usr/local/bin/azcopy"
+#       owner: "root"
+#       group: "root"
+#       mode: 0755
 
-  - name: Azure Profile Credentials Variable Export
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^export.AZURE_PROFILE=.*"
-      line: "export AZURE_PROFILE=~/.azure/credentials"
-      state: present
+    - name: Snap Packages
+      snap:
+        name:
+        - helm
+        - kubeadm
+        - kubectl
+        classic: true
 
-  - name: Azure DevOps Profile Credentials Variable Export
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^export.AZURE_DEVOPS_EXT_PAT=.*"
-      line: "export AZURE_DEVOPS_EXT_PAT=$(echo ~/.azure/azure_devops_token)"
-      state: present
+    - name: User Binaries Directory
+      file:
+        path: "/home/{{ localadmin }}/bin"
+        state: directory
+      register: home_bin
+      become: false
 
-  - name: Verify AWS CLI Completion in .bashrc
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^complete..C..$(which aws_completer)..aws"
-      line: "complete -C \"$(which aws_completer)\" aws"
-      state: present
-
-  - name: Verify kubeadm Completion in .bashrc
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: ".*source.*kubeadm.completion.bash."
-      line: "source <(kubeadm completion bash)"
-      state: present
-
-  - name: Verify kubectl Completion in .bashrc
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: ".*source.*kubectl.completion.bash."
-      line: "source <(kubectl completion bash)"
-      state: present
-
-  # Non-Essential - For convenience when working in an interactive Bash session
-  - name: Prompt in .bashrc
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^PS1=.*"
-      line: "PS1='\\n\\[\\033[36m\\]\\W\\[\\033[31m\\]$(__git_ps1 \" (%s)\")\\n\\[\\033[0m\\]$ \\[\\033[0m\\]'"
-      state: present
-
-  # Non-Essential - For convenience when working in an interactive Bash session
-  - name: Tab Menu Complete in .bashrc
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: "^bind.TAB.menu.complete.*"
-      line: "bind TAB:menu-complete"
-      state: present
-
-  # Non-Essential - For convenience when working in an interactive Bash session
-  - name: Prompt in .bashrc
-    lineinfile:
-      path: "/home/{{ localadmin }}/.bashrc"
-      regexp: ".*force_color_prompt=.*"
-      line: "force_color_prompt=yes"
-      state: present
-
-  - name: Vim is Default Editor
-    alternatives:
-      name: editor
-      path: /usr/bin/vim.nox
-      priority: 80
-
-  - name: Vundle Directory
-    file:
-      path: "/home/{{ localadmin }}/.vim/bundle/Vundle.vim"
-      state: directory
-      mode: '0755'
-    become: False
-
-  - name: Vundle Git Repository
-    git:
-      repo: 'https://github.com/VundleVim/Vundle.vim.git'
-      dest: "/home/{{ localadmin }}/.vim/bundle/Vundle.vim"
-      clone: True
-      update: True
-    become: False
-
-  - name: Vundle Plugins
-    shell:
-      vim +PluginInstall +qall
-    become: False
-
-  - name: Azure CLI Prerequisite Software
-    apt:
-      name: "{{ packages }}"
-      state: present
-      update_cache: yes
-    vars:
-      packages:
-      - apt-transport-https
-      - lsb-release
-      - gnupg
-
-  - name: Azure CLI
-    apt:
-      name: "{{ packages }}"
-      state: present
-      update_cache: yes
-    vars:
-      packages:
-      - azure-cli
-
-  - stat:
-      path: /usr/bin/az
-    register: azure_cli
-
-  # Azure DevOps Extension for Azure CLI
-  # https://github.com/Azure/azure-devops-cli-extension
-  - name: Azure DevOps CLI
-    shell: 'az extension add --name azure-devops'
-    become: false
-    when: azure_cli is defined and azure_cli.stat.executable
-    register: azure_cli_devops
-
-  - debug:
-      var: azure_cli_devops
-
-  - name: PowerShell Core
-    apt:
-      name: powershell
-      state: present
-      update_cache: yes
-
-  - name: PowerShell Trusted Repository - PSGallery
-    shell: 'Set-PSRepository -Name PSGallery -InstallationPolicy Trusted'
-    args:
-      executable: /usr/bin/pwsh
-
-  - name: PowerShell Module - PowerShellGet
-    shell: 'Install-Module -Name PowerShellGet -Force'
-    args:
-      executable: /usr/bin/pwsh
-    become: false
-
-  - name: Azure PowerShell Modules Path
-    shell: "Test-Path /home/{{ localadmin }}/.local/share/powershell/Modules/Az"
-    args:
-      executable: /usr/bin/pwsh
-    become: false
-    changed_when: false
-    register: azure_powershell
-
-# - debug:
-#     var: azure_powershell
-
-  - name: Azure PowerShell Modules
-    shell: 'Install-Module -Name Az -AllowClobber -Force'
-    args:
-      executable: /usr/bin/pwsh
-    when: azure_powershell.stdout == 'False'
-    register: azure_powershell_install
-    become: false
-
-# - debug:
-#     var: azure_powershell_install
-
-  - name: AWS PowerShell NetCore Modules Path
-    shell: "Test-Path /home/{{ localadmin }}/.local/share/powershell/Modules/AWSPowerShell.NetCore"
-    args:
-      executable: /usr/bin/pwsh
-    become: false
-    changed_when: false
-    register: aws_powershell
-
-# - debug:
-#     var: aws_powershell
-
-  - name: AWS PowerShell NetCore Modules
-    shell: 'Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force'
-    args:
-      executable: /usr/bin/pwsh
-    when: aws_powershell.stdout == 'False'
-    register: aws_powershell_install
-    become: false
-
-# - debug:
-#     var: aws_powershell_install
-
-# - name: AzCopy Installer
-#   file:
-#     path: "/home/{{ localadmin }}/azcopy_install.sh"
-#     owner: "{{ localadmin }}"
-#     group: "{{ localadmin }}"
-#     mode: 0755
-
-# - name: AzCopy Latest Version
-#   shell: "/home/{{ localadmin }}/azcopy_install.sh"
-#   args:
-#     chdir: "/home/{{ localadmin }}/"
-#   register: azcopy
-
-# - debug:
-#     var: azcopy
-
-# - name: AzCopy Status
-#   file:
-#     path: "/usr/local/bin/azcopy"
-#     owner: "root"
-#     group: "root"
-#     mode: 0755
-
-  - name: Snap Packages
-    snap:
-      name:
-      - helm
-      - kubeadm
-      - kubectl
-      classic: true
-
-  - name: User Binaries Directory
-    file:
-      path: "/home/{{ localadmin }}/bin"
-      state: directory
-    register: home_bin
-    become: false
-
-  - name: cheat.sh Script on Latest Version
-    get_url:
-      url: "https://cht.sh/:cht.sh"
-      dest: "/home/{{ localadmin }}/bin/cht.sh"
-      mode: '0750'
-    become: false
+    - name: cheat.sh Script on Latest Version
+      get_url:
+        url: "https://cht.sh/:cht.sh"
+        dest: "/home/{{ localadmin }}/bin/cht.sh"
+        mode: '0750'
+      become: false
 ...
