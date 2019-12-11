@@ -13,6 +13,8 @@ Vagrant.configure("2") do |config|
     workstation.vm.box = "ubuntu/bionic64"
     workstation.vm.hostname = 'ubu18ws1'
     workstation.vm.network :private_network, ip: "192.168.56.11"
+    workstation.vm.provision "file", source: "#{ENV['VAGRANT_SHARED_SSH_PRIVATE_KEY']}", destination: "/home/vagrant/.ssh/vagrant_rsa"
+    workstation.vm.provision "file", source: "#{ENV['VAGRANT_SHARED_SSH_PUBLIC_KEY']}", destination: "/home/vagrant/.ssh/vagrant_rsa.pub"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_ANSIBLE_VAULT_SECRET']}", destination: "/home/vagrant/.ansible/.vault_password"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_AZURE_CREDENTIALS']}", destination: "/home/vagrant/.azure/credentials"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_AZURE_DEVOPS_TOKEN']}", destination: "/home/vagrant/.azure/azure_devops_token"
