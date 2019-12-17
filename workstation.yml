@@ -156,6 +156,13 @@
         group: "{{ localadmin }}"
         mode: 0600
 
+    - name: Ignore Case in Bash Completion
+      lineinfile:
+        path: "/home/{{ localadmin }}/.bashrc"
+        regexp: "^set.*completion-ignore-case.*"
+        line: "set completion-ignore-case on"
+        state: present
+
     - name: Ansible Configuration Variable Export
       lineinfile:
         path: "/home/{{ localadmin }}/.bashrc"
