@@ -22,13 +22,16 @@ ORIGINAL_FILENAME=$(basename $RESOLVED_URL)
 BASE_FILENAME=$(echo $ORIGINAL_FILENAME | sed 's/\.tar\.gz//g')
 
 # Decompress and untar the azcoyp binary
-tar xzvf $ORIGINAL_FILENAME --strip=1 ${BASE_FILENAME}/azcopy >/dev/null
+tar xzf $ORIGINAL_FILENAME --strip=1 ${BASE_FILENAME}/azcopy >/dev/null
 
 # Install the binary with local software
 mv ./azcopy /usr/local/bin/ >/dev/null
 
 # Verify binary is functioning on path and remove tar file if so
-rm $ORIGINAL_FILENAME
-azcopy --version
-
+if [[ $(azcopy --version) -ne 0 ]]; then
+  exit 1
+else
+  rm $ORIGINAL_FILENAME
+  exit 0
+fi
 # EOF
