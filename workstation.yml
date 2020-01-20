@@ -82,7 +82,7 @@
           - libssl-dev
           - python-apt
           - python-dev
-          - python-pip
+#         - python-pip
           - renameutils
           - rlwrap
           - snap
@@ -90,11 +90,11 @@
           - vim-nox
           - xsel
 
-#   Alternative PIP Installation Method
-#   - name: Python PIP
-#     shell: |
-#       curl -s https://bootstrap.pypa.io/get-pip.py | python
-#     register: pip_install
+    # Alternative PIP Installation Method
+    - name: Python PIP
+      shell: |
+        curl -s https://bootstrap.pypa.io/get-pip.py | python
+      register: pip_install
 
     - name: Python Packages (PIP)
       pip:
@@ -102,6 +102,7 @@
         - ansible[azure]
         - aws-shell
         - awscli
+        - azure-cli
         - boto3
         - pymongo
         - pywinrm>=0.3.0
@@ -280,17 +281,25 @@
         - lsb-release
         - gnupg
 
-    - name: Azure CLI
-      apt:
-        name: "{{ packages }}"
-        state: present
-        update_cache: yes
-      vars:
-        packages:
-        - azure-cli
+#   - name: Azure CLI
+#     apt:
+#       name: "{{ packages }}"
+#       state: present
+#       update_cache: yes
+#     vars:
+#       packages:
+#       - azure-cli
+
+#   - name: Azure CLI (Manual)
+#     shell: curl -sL https://aka.ms/InstallAzureCli | bash
+#     register: azure_cli_install
+
+#   - debug:
+#       var: azure_cli_install
 
     - stat:
         path: /usr/bin/az
+      become: False
       register: azure_cli
 
     # Azure DevOps Extension for Azure CLI
