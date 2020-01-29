@@ -29,9 +29,6 @@
         state: present
       register: apt_key_google
 
-#   - debug:
-#       var: apt_key_google
-
     - name: Apt Signing Key for Microsoft
       apt_key:
         url: https://packages.microsoft.com/keys/microsoft.asc
@@ -62,7 +59,7 @@
         repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_facts['distribution_release'] }} main"
         state: present
 
-    - name: Security Updates Installed
+    - name: Security Updates
       shell: |
         unattended-upgrade -d
       register: unattended_upgrade
@@ -128,25 +125,6 @@
         path: "/home/{{ localadmin }}/.ssh/id_rsa"
         size: 4096
         type: rsa
-
-#   - name: Private SSH Key Exists
-#     stat:
-#       path: "/home/{{ localadmin }}/.ssh/id_rsa"
-#     register: ssh_key
-
-#   - name: Generate SSH Keys if Non-Existent
-#     shell: |
-#       ssh-keygen -b 2048 -t rsa -f "/home/{{ localadmin }}/.ssh/id_rsa" -q -N "" -C ""
-#     when: ssh_key.stat.exists == False
-#     # become_user: "{{ localadmin }}"
-#     # become: true
-
-#   - name: SSH Key Permissions
-#     file:
-#       path: "/home/{{ localadmin }}/.ssh/id_rsa"
-#       owner: "{{ localadmin }}"
-#       group: "{{ localadmin }}"
-#       mode: 0600
 
     - name: Ansible Vault Password File Ownership and Permissions
       file:
@@ -336,9 +314,6 @@
       changed_when: false
       register: azure_powershell
 
-#   - debug:
-#       var: azure_powershell
-
     - name: Azure PowerShell Modules
       shell: 'Install-Module -Name Az -AllowClobber -Force'
       args:
@@ -347,9 +322,6 @@
       register: azure_powershell_install
       become: false
 
-#   - debug:
-#       var: azure_powershell_install
-
     - name: AWS PowerShell NetCore Modules Path
       shell: "Test-Path /home/{{ localadmin }}/.local/share/powershell/Modules/AWSPowerShell.NetCore"
       args:
@@ -357,9 +329,6 @@
       become: false
       changed_when: false
       register: aws_powershell
-
-#   - debug:
-#       var: aws_powershell
 
     - name: AWS PowerShell NetCore Modules
       shell: 'Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force'
