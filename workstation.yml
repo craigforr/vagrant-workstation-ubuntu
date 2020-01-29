@@ -90,6 +90,25 @@
           - vim-nox
           - xsel
 
+    - name: Apt Software Packages for LastPass CLI
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - bash-completion
+          - build-essential
+          - cmake
+          - libcurl4
+          - libcurl4-openssl-dev
+          - libssl-dev
+          - libxml2
+          - libxml2-dev
+          - libssl1.1
+          - pkg-config
+          - ca-certificates
+          - xclip
 
     - name: Python Packages (PIP)
       pip:
@@ -358,4 +377,30 @@
         dest: "/home/{{ localadmin }}/bin/cht.sh"
         mode: '0750'
       become: false
+
+    - name: LastPass CLI Git Repository
+      git:
+        repo: 'https://github.com/lastpass/lastpass-cli.git'
+        dest: "/home/{{ localadmin }}/repos/github/lastpass-cli"
+        clone: True
+        update: True
+      become: False
+
+    - name: LastPass CLI Build
+      shell: make
+      args:
+        executable: /bin/bash
+        chdir: "/home/{{ localadmin }}/repos/github/lastpass-cli"
+      become: False
+
+    - name: LastPass CLI on Path
+      copy:
+        src: "/home/{{ localadmin }}/repos/github/lastpass-cli/build/lpass"
+        dest: /usr/local/bin/lpass
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0755
+      become: true
+      register: lastpass_cli_status
 ...
