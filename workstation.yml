@@ -9,6 +9,9 @@
 
     - debug:
         var: ansible_facts
+      tags:
+        - debug
+        - never
 
     - name: Prerequisite Apt Software Packages over HTTPS
       apt:
@@ -82,7 +85,7 @@
           - libssl-dev
           - python-apt
           - python-dev
-#         - python-pip
+          - python-pip
           - renameutils
           - rlwrap
           - snap
@@ -90,27 +93,22 @@
           - vim-nox
           - xsel
 
-    # Alternative PIP Installation Method
-    - name: Python PIP
-      shell: |
-        curl -s https://bootstrap.pypa.io/get-pip.py | python
-      register: pip_install
 
     - name: Python Packages (PIP)
       pip:
         name:
-        - ansible[azure]
-        - aws-shell
-        - awscli
-        - azure-cli
-        - boto3
-        - pymongo
-        - pywinrm>=0.3.0
-        - pywinrm[credssp]
-        - pywinrm[kerberos]
-        - requests-credssp
-        - requests-kerberos
-        - yq
+          - ansible[azure]
+          - aws-shell
+          - awscli
+          - azure-cli
+          - boto3
+          - pymongo
+          - pywinrm>=0.3.0
+          - pywinrm[credssp]
+          - pywinrm[kerberos]
+          - requests-credssp
+          - requests-kerberos
+          - yq
 
     - name: SSH Directory
       file:
