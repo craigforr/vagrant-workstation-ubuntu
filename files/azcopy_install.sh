@@ -28,7 +28,8 @@ tar xzf $ORIGINAL_FILENAME --strip=1 ${BASE_FILENAME}/azcopy >/dev/null
 mv ./azcopy /usr/local/bin/ >/dev/null
 
 # Verify binary is functioning on path and remove tar file if so
-if [[ $(azcopy --version) -ne 0 ]]; then
+azcopy --version
+if [[ $? -ne 0 ]]; then
   exit 1
 else
   rm $ORIGINAL_FILENAME
