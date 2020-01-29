@@ -257,37 +257,14 @@
         - lsb-release
         - gnupg
 
-#   - name: Azure CLI
-#     apt:
-#       name: "{{ packages }}"
-#       state: present
-#       update_cache: yes
-#     vars:
-#       packages:
-#       - azure-cli
-
-#   - name: Azure CLI (Manual)
-#     shell: curl -sL https://aka.ms/InstallAzureCli | bash
-#     register: azure_cli_install
-
-#   - debug:
-#       var: azure_cli_install
-
-    - stat:
-        path: /usr/bin/az
-      become: False
-      register: azure_cli
-
-    # Azure DevOps Extension for Azure CLI
-    # https://github.com/Azure/azure-devops-cli-extension
-    - name: Azure DevOps CLI
-      shell: 'az extension add --name azure-devops'
-      become: false
-      when: azure_cli is defined and azure_cli.stat.executable
-      register: azure_cli_devops
-
-    - debug:
-        var: azure_cli_devops
+    - name: Azure CLI
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+        - azure-cli
 
     - name: PowerShell Core
       apt:
