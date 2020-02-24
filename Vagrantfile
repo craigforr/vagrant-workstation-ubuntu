@@ -1,17 +1,19 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+hostname = 'ubu18ws1'
+
 Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox"
 
-  # Development Workstation -----------------------------------
+  # Development Workstation -----------------------------------------
   config.vm.define "workstation", primary: true do |workstation|
     # Ubuntu 18.04.2 LTS (Bionic Beaver)
     # https://app.vagrantup.com/ubuntu/boxes/bionic64
     # http://cloud-images.ubuntu.com/bionic/
     workstation.vm.box = "ubuntu/bionic64"
-    workstation.vm.hostname = 'ubu18ws1'
+    workstation.vm.hostname = hostname
     workstation.vm.network :private_network, ip: "192.168.56.11"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_SHARED_SSH_PRIVATE_KEY']}", destination: "/home/vagrant/.ssh/vagrant_rsa"
     workstation.vm.provision "file", source: "#{ENV['VAGRANT_SHARED_SSH_PUBLIC_KEY']}", destination: "/home/vagrant/.ssh/vagrant_rsa.pub"
@@ -35,7 +37,7 @@ Vagrant.configure("2") do |config|
       vb.gui = false
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
       vb.customize ["modifyvm", :id, "--memory", 1024]
-      vb.customize ["modifyvm", :id, "--name", "ubu18ws1"]
+      vb.customize ["modifyvm", :id, "--name", hostname]
     end
     workstation.vm.provision "ansible_local" do |ansible|
       ansible.compatibility_mode  = "2.0"
