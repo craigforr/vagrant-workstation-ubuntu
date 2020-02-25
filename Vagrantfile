@@ -41,6 +41,7 @@ Vagrant.configure("2") do |config|
     end
     workstation.vm.provision "ansible_local" do |ansible|
       ansible.compatibility_mode  = "2.0"
+      ansible.extra_vars          = { ansible_python_interpreter:"/usr/bin/python3" }
       ansible.playbook            = "workstation.yml"
       ansible.verbose             = false
     end

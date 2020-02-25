@@ -80,9 +80,9 @@
           - jq
           - libkrb5-dev
           - libssl-dev
-          - python-apt
-          - python-dev
-          - python-pip
+          - python3-apt
+          - python3-dev
+          - python3-pip
           - renameutils
           - rlwrap
           - snap
