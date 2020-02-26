@@ -407,6 +407,16 @@
         mode: '0750'
       become: false
 
+    - name: Disable SSH Strict Host Key Checking
+      blockinfile:
+        path: "~/.ssh/config"
+        block: |
+          Host *
+              StrictHostKeyChecking no
+        create: yes
+        mode: 0600
+      become: false
+
     - name: LastPass CLI Git Repository
       git:
         repo: 'https://github.com/lastpass/lastpass-cli.git'
