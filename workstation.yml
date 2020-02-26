@@ -125,25 +125,41 @@
           - requests-credssp
           - requests-kerberos
           - yq
+      become: true
 
     - name: SSH Directory
       file:
         name: "/home/{{ localadmin }}/.ssh"
         state: directory
+        owner: "{{ localadmin }}"
+        group: "{{ localadmin }}"
+      become: true
 
-    - name: Private SSH Key for Ansible
+    # This should already exist, placed by Vagrant
+    - name: Private SSH Key
       file:
-        path: "/home/{{ localadmin }}/.ssh/vagrant_rsa"
+        path: "/home/{{ localadmin }}/.ssh/id_rsa"
         owner: "{{ localadmin }}"
         group: "{{ localadmin }}"
         mode: 0600
+      become: true
 
-    - name: Open SSH Key Pair
-      openssh_keypair:
+    # This should already exist, placed by Vagrant
+    - name: Public SSH Key
+      file:
+        path: "/home/{{ localadmin }}/.ssh/id_rsa.pub"
         owner: "{{ localadmin }}"
-        path: "/home/{{ localadmin }}/.ssh/id_rsa"
-        size: 4096
-        type: rsa
+        group: "{{ localadmin }}"
+        mode: 0644
+      become: true
+
+#   - name: Open SSH Key Pair
+#     openssh_keypair:
+#       owner: "{{ localadmin }}"
+#       path: "/home/{{ localadmin }}/.ssh/id_rsa"
+#       size: 4096
+#       type: rsa
+#     become: true
 
     - name: Ansible Vault Password File Ownership and Permissions
       file:
