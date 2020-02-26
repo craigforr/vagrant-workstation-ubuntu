@@ -1,6 +1,8 @@
 ---
 - name: Ansible Controller Tasks
-  hosts: workstation
+  hosts:
+    - localhost
+    - workstation
   become: true # Default become_user is root
   vars:
     localadmin: vagrant
